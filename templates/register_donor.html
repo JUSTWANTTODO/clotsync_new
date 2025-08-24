@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Registration - ClotSync</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 80px 0; }
+        .feature-card { transition: transform 0.3s ease; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .feature-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-heartbeat text-white me-2"></i>ClotSync</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/donor_portal">Portal</a>
+                <a class="nav-link" href="/">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4"><i class="fas fa-user-plus me-3"></i>Donor Registration</h1>
+            <p class="lead mb-4">Be a Hero - Save Lives Through Blood Donation</p>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card feature-card">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Register as a Donor</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="donorRegistrationForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="donorName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Blood Group</label>
+                                        <select class="form-select" id="donorBloodGroup" required>
+                                            <option value="">Select Blood Group</option>
+                                            <option value="A Negative">A Negative</option>
+                                            <option value="A Positive">A Positive</option>
+                                            <option value="B Positive">B Positive</option>
+                                            <option value="A1 Positive">A1 Positive</option>
+                                            <option value="A1B Positive">A1B Positive</option>
+                                            <option value="A2 Negative">A2 Negative</option>
+                                            <option value="A2B Negative">A2B Negative</option>
+                                            <option value="A2B Positive">A2B Positive</option>
+                                            <option value="AB Positive">AB Positive</option>
+                                            <option value="B Negative">B Negative</option>
+                                            <option value="Bombay Blood Group">Bombay Blood Group</option>
+                                            <option value="O Negative">O Negative</option>
+                                            <option value="O Positive">O Positive</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" id="donorGender" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Location</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="donorLocation" required readonly>
+                                            <button type="button" class="btn btn-outline-secondary" id="detectLocation">
+                                                <i class="fas fa-map-marker-alt"></i> Detect
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted">Click "Detect" to automatically get your location</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Contact Number</label>
+                                        <input type="tel" class="form-control" id="donorContact" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="donorAvailability" checked>
+                                        <label class="form-check-label">I am available for blood donation</label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden fields for coordinates -->
+                                <input type="hidden" id="donorLatitude">
+                                <input type="hidden" id="donorLongitude">
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">Register as Donor</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2024 ClotSync. Thank you for being a lifesaver!</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Location detection functionality
+        document.getElementById('detectLocation').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        
+                        // Store coordinates in hidden fields
+                        document.getElementById('donorLatitude').value = latitude;
+                        document.getElementById('donorLongitude').value = longitude;
+                        
+                        // Reverse geocode to get location name
+                        reverseGeocode(latitude, longitude);
+                    },
+                    function(error) {
+                        console.error('Error getting location:', error);
+                        alert('Could not detect location. Please enter manually.');
+                        document.getElementById('donorLocation').readOnly = false;
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+                document.getElementById('donorLocation').readOnly = false;
+            }
+        });
+
+        // Reverse geocoding function
+        async function reverseGeocode(lat, lon) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`, {
+                    headers: {
+                        'User-Agent': 'ClotSync-DonorRegistration/1.0'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const address = data.address;
+                    
+                    // Try to get city/town/village name
+                    let locationName = '';
+                    for (const key of ['city', 'town', 'village', 'suburb', 'county', 'state']) {
+                        if (address[key]) {
+                            locationName = address[key];
+                            break;
+                        }
+                    }
+                    
+                    if (!locationName) {
+                        if (address.state) locationName = address.state;
+                        if (address.country) locationName += (locationName ? ', ' : '') + address.country;
+                    }
+                    
+                    if (locationName) {
+                        document.getElementById('donorLocation').value = locationName;
+                    } else {
+                        document.getElementById('donorLocation').value = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+                    }
+                } else {
+                    document.getElementById('donorLocation').value = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+                }
+            } catch (error) {
+                console.error('Reverse geocoding failed:', error);
+                document.getElementById('donorLocation').value = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+            }
+        }
+
+        // Form submission
+        document.getElementById('donorRegistrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('donorName').value,
+                blood_group: document.getElementById('donorBloodGroup').value,
+                gender: document.getElementById('donorGender').value,
+                location: document.getElementById('donorLocation').value,
+                contact: document.getElementById('donorContact').value,
+                availability: document.getElementById('donorAvailability').checked,
+                latitude: parseFloat(document.getElementById('donorLatitude').value) || null,
+                longitude: parseFloat(document.getElementById('donorLongitude').value) || null
+            };
+
+            fetch('/register_donor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Registration successful! You will receive alerts for blood requests.');
+                    window.location.href = '/donor_portal';
+                } else {
+                    alert('Registration failed. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Registration failed. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>
+

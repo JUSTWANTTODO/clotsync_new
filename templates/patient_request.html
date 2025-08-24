@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Blood Request - ClotSync</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-warning">
+    <div class="container">
+      <a class="navbar-brand" href="/">ClotSync</a>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Request Blood (No Login Required)</h4>
+          </div>
+          <div class="card-body">
+            <form id="patientRequestForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" id="patientName" class="form-control" placeholder="e.g., A.V. Ramana Rao" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Blood Group</label>
+                  <select id="patientBloodGroup" class="form-select" required>
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option><option value="A-">A-</option>
+                    <option value="B+">B+</option><option value="B-">B-</option>
+                    <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                    <option value="O+">O+</option><option value="O-">O-</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Number of Units</label>
+                  <input type="number" id="requestUnits" class="form-control" min="1" value="2" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Required By Date</label>
+                  <input type="text" id="requiredBy" class="form-control" placeholder="e.g., 20th August 2025" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Gender</label>
+                  <select id="patientGender" class="form-select">
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Age</label>
+                  <input type="number" id="patientAge" class="form-control" min="0" max="120" />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Medical Problem</label>
+                <input type="text" id="patientProblem" class="form-control" placeholder="e.g., Bypass surgery (Heart)" />
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Hospital</label>
+                  <select id="patientHospital" class="form-select">
+                    <option value="">Select Hospital</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Location</label>
+                  <input type="text" id="patientLocation" class="form-control" placeholder="e.g., Banjara hills" required />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">State</label>
+                  <input type="text" id="patientState" class="form-control" placeholder="e.g., Telangana" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">District</label>
+                  <input type="text" id="patientDistrict" class="form-control" placeholder="e.g., Hyderabad" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Contact Name</label>
+                  <input type="text" id="contactName" class="form-control" placeholder="e.g., Srujana" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Contact Number</label>
+                  <input type="tel" id="patientContact" class="form-control" placeholder="e.g., 8185861631" required />
+                </div>
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-warning btn-lg">Submit Request</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Load hospitals
+    fetch('/api/hospitals').then(r=>r.json()).then(d=>{
+      const sel = document.getElementById('patientHospital');
+      if (!sel || !d.hospitals) return;
+      d.hospitals.forEach(h=>{
+        const opt=document.createElement('option'); opt.value=h.id; opt.textContent=`${h.name} — ${h.location}`; sel.appendChild(opt);
+      })
+    });
+
+    document.getElementById('patientRequestForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById('patientName').value,
+        blood_group: document.getElementById('patientBloodGroup').value,
+        units_needed: parseInt(document.getElementById('requestUnits').value || '1'),
+        requested_date_text: document.getElementById('requiredBy').value,
+        location: document.getElementById('patientLocation').value,
+        contact: document.getElementById('patientContact').value,
+        gender: document.getElementById('patientGender').value,
+        age: parseInt(document.getElementById('patientAge').value || '0'),
+        problem: document.getElementById('patientProblem').value,
+        district: document.getElementById('patientDistrict').value,
+        state: document.getElementById('patientState').value,
+        hospital_id: parseInt(document.getElementById('patientHospital').value || '0'),
+        contact_name: document.getElementById('contactName').value,
+        contact_phone: document.getElementById('patientContact').value,
+      };
+
+      // 1) Register minimal patient row
+      fetch('/register_patient', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(r => r.json())
+        .then(d => {
+          if (!d.patient_id) throw new Error('Registration failed');
+          // 2) Create request without login
+          return fetch('/request_blood', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+            patient_id: d.patient_id,
+            blood_group: payload.blood_group,
+            units_needed: payload.units_needed,
+            requested_date_text: payload.requested_date_text,
+            contact_name: payload.contact_name,
+            contact_phone: payload.contact_phone,
+            urgency: 'urgent'
+          })});
+        })
+        .then(r => r.json())
+        .then(x => {
+          if (x.request_id) {
+            alert('Request submitted successfully. Donors will be notified.');
+            document.getElementById('patientRequestForm').reset();
+          } else {
+            alert('Failed to submit request. Please try again.');
+          }
+        })
+        .catch(() => alert('Could not submit your request. Please try again.'));
+    });
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Dashboard - ClotSync</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .alert-card {
+            border-left: 4px solid #dc3545;
+            transition: all 0.3s ease;
+        }
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .donation-badge {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+        }
+        .stats-card { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; }
+        .leaderboard-position-card { border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .position-number { font-size: 2.5rem; font-weight: bold; color: #ffc107; }
+        .position-label { font-size: 0.9rem; color: #6c757d; }
+        .top-20-indicator { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #000; font-weight: bold; }
+        .below-20-indicator { background: linear-gradient(45deg, #17a2b8, #20c997); color: white; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat me-2"></i>ClotSync
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/donor_portal">Back to Portal</a>
+                <a class="nav-link" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Donor Stats Card -->
+                <div class="card stats-card mb-4">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-circle fa-3x mb-3"></i>
+                        <h4 id="donorName">Loading...</h4>
+                        <p class="mb-2">
+                            <strong>Blood Group:</strong> <span id="donorBloodGroup">Loading...</span>
+                        </p>
+                        <p class="mb-2" id="donorLocation">Loading...</p>
+                        <p class="mb-0">
+                            <strong>Total Donations:</strong> <span id="donationCount">Loading...</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Position Card -->
+                <div class="card leaderboard-position-card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Your Leaderboard Position</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div id="leaderboardPosition">
+                            <div class="spinner-border text-warning" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-outline-primary w-100 mb-2" onclick="toggleAvailability()">
+                            <i class="fas fa-toggle-on me-2"></i>Toggle Availability
+                        </button>
+                        <button class="btn btn-outline-success w-100" onclick="viewLeaderboard()">
+                            <i class="fas fa-trophy me-2"></i>View Full Leaderboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blood Request Alerts & Requests List -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-bell me-2"></i>Blood Request Alerts</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshAlerts()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertsContainer">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading alerts...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-hospital me-2"></i>Hospital-Backed Requests</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadDonorRequests()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="requestsList">
+                            <div class="text-center text-muted">No requests loaded.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Leaderboard -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-trophy me-2"></i>Top 10 Donors</h5>
+                        <a href="/leaderboard" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-external-link-alt"></i> View Full
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="miniLeaderboard">
+                            <div class="text-center p-3">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading leaderboard...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal fade" id="donationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Donation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to mark this donation as completed?</p>
+                    <div id="donationDetails"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmDonation()">Confirm Donation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDonor = null;
+        let currentRequestId = null;
+
+        // Load donor data
+        async function loadDonorData() {
+            try {
+                const response = await fetch('/api/donor/profile');
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login_donor';
+                    return;
+                }
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentDonor = data.donor;
+                    document.getElementById('donorName').textContent = data.donor.name;
+                    document.getElementById('donorBloodGroup').textContent = data.donor.blood_group;
+                    document.getElementById('donorLocation').textContent = data.donor.location;
+                    document.getElementById('donationCount').textContent = data.donor.donations_count;
+                }
+            } catch (error) {
+                // Redirect to login if fetch fails
+                window.location.href = '/login_donor';
+            }
+        }
+
+        // Load alerts
+        async function loadAlerts() {
+            try {
+                const response = await fetch('/api/donor/alerts');
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login_donor';
+                    return;
+                }
+                const data = await response.json();
+                
+                const container = document.getElementById('alertsContainer');
+                
+                if (response.ok && data.alerts.length > 0) {
+                    container.innerHTML = data.alerts.map(alert => {
+                        const urgencyClass = alert.urgency === 'emergency' ? 'bg-danger' : 
+                                           alert.urgency === 'urgent' ? 'bg-warning' : 'bg-info';
+                        
+                        if (alert.status === 'accepted') {
+                            // Show accepted request with status
+                            return `
+                                <div class="alert alert-success mb-3" data-request-id="${alert.id}">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="alert-heading">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                Request Accepted - Waiting for Hospital Confirmation
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <strong>Request Code:</strong> ${alert.request_code || 'N/A'}<br>
+                                                    <strong>Blood Group:</strong> <span class="badge bg-danger">${alert.blood_group}</span><br>
+                                                    <strong>Units Needed:</strong> <span class="badge bg-primary">${alert.units_needed}</span><br>
+                                                    <strong>Urgency:</strong> <span class="badge ${urgencyClass}">${alert.urgency}</span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <strong>Required By:</strong> ${alert.required_by || 'ASAP'}<br>
+                                                    <strong>Hospital:</strong> ${alert.hospital_name}<br>
+                                                    <strong>Location:</strong> ${alert.hospital_location}<br>
+                                                    <strong>Created:</strong> ${new Date(alert.created_at).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                            ${alert.note ? `<div class="mt-2"><strong>Your Note:</strong> ${alert.note}</div>` : ''}
+                                            <div class="mt-2">
+                                                <span class="badge bg-warning">Status: ${alert.acceptance_status}</span>
+                                                ${alert.units_donated ? `<span class="badge bg-success ms-2">Units Donated: ${alert.units_donated}</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="text-muted small">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Accepted on ${new Date(alert.created_at).toLocaleString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // Show new request for acceptance
+                            return `
+                                <div class="alert alert-card mb-3" data-request-id="${alert.id}">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="alert-heading">
+                                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                                New Blood Request
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <strong>Request Code:</strong> ${alert.request_code || 'N/A'}<br>
+                                                    <strong>Blood Group:</strong> <span class="badge bg-danger">${alert.blood_group}</span><br>
+                                                    <strong>Units Needed:</strong> <span class="badge bg-primary">${alert.units_needed}</span><br>
+                                                    <strong>Urgency:</strong> <span class="badge ${urgencyClass}">${alert.urgency}</span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <strong>Required By:</strong> ${alert.required_by || 'ASAP'}<br>
+                                                    <strong>Hospital:</strong> ${alert.hospital_name}<br>
+                                                    <strong>Location:</strong> ${alert.hospital_location}<br>
+                                                    <strong>Created:</strong> ${new Date(alert.created_at).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="mb-2">
+                                                <input type="text" id="note_${alert.id}" class="form-control form-control-sm mb-2" placeholder="Optional note (e.g., available time)">
+                                            </div>
+                                            <button class="btn btn-sm btn-success" onclick="acceptRequest(${alert.id})">
+                                                <i class="fas fa-check me-1"></i>Accept Request
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No alerts at the moment</h5>
+                            <p class="text-muted">You'll be notified when there are blood requests matching your blood group.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                window.location.href = '/login_donor';
+            }
+        }
+
+        // Mark donation
+        function markDonation(requestId) {
+            currentRequestId = requestId;
+            const modal = new bootstrap.Modal(document.getElementById('donationModal'));
+            modal.show();
+        }
+
+        // Confirm donation
+        async function confirmDonation() {
+            try {
+                const response = await fetch('/api/donor/mark-donation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        request_id: currentRequestId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('donationModal')).hide();
+                    
+                    // Show success message
+                    alert('Donation marked successfully! Thank you for saving a life!');
+                    
+                    // Refresh data
+                    loadDonorData();
+                    loadAlerts();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error marking donation:', error);
+                alert('Error marking donation. Please try again.');
+            }
+        }
+
+        // Load hospital-backed requests for this donor
+        async function loadDonorRequests() {
+            try {
+                const resp = await fetch('/api/donor/requests');
+                if (resp.status === 401 || resp.status === 403) {
+                    window.location.href = '/login_donor';
+                    return;
+                }
+                const data = await resp.json();
+                const container = document.getElementById('requestsList');
+                if (!data.requests || data.requests.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted">No matching hospital-backed requests right now.</div>';
+                    return;
+                }
+                let html = '';
+                data.requests.forEach(r => {
+                    html += `
+                        <div class="border rounded p-3 mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div><strong>${r.hospital_name || 'Hospital N/A'}</strong></div>
+                                    <small class="text-muted">${r.hospital_location || r.patient_location || ''}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div><span class="badge bg-danger">${r.blood_group}</span> <span class="badge bg-primary">${r.units_needed} units</span></div>
+                                    <small class="text-muted">${r.distance_text}</small>
+                                </div>
+                            </div>
+                            <div class="mt-2 small text-muted">Code: ${r.request_code || 'N/A'} • Urgency: ${r.urgency}</div>
+                            <div class="mt-2 d-flex">
+                                <input type="text" id="accept_note_${r.id}" class="form-control form-control-sm me-2" placeholder="Optional note" />
+                                <button class="btn btn-sm btn-success" onclick="acceptRequest(${r.id})"><i class="fas fa-check me-1"></i>Accept</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                window.location.href = '/login_donor';
+            }
+        }
+
+        async function acceptRequest(requestId) {
+            const note = document.getElementById(`note_${requestId}`).value;
+            try {
+                const resp = await fetch('/api/donor/mark-donation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ request_id: requestId, note })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    alert('Acceptance recorded. Hospital has been notified.');
+                    loadAlerts();
+                } else {
+                    alert(data.error || 'Failed to accept request');
+                }
+            } catch (e) {
+                alert('Failed to accept request');
+            }
+        }
+
+        // Toggle availability
+        async function toggleAvailability() {
+            try {
+                const response = await fetch('/api/donor/toggle-availability', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Availability updated successfully!');
+                    loadDonorData();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                alert('Error updating availability. Please try again.');
+            }
+        }
+
+        // View leaderboard
+        function viewLeaderboard() {
+            window.location.href = '/leaderboard';
+        }
+
+        // Refresh alerts
+        function refreshAlerts() {
+            loadAlerts();
+        }
+
+        // Load leaderboard position
+        async function loadLeaderboardPosition() {
+            try {
+                const response = await fetch('/api/donor/leaderboard-position');
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login_donor';
+                    return;
+                }
+                const data = await response.json();
+                const positionElement = document.getElementById('leaderboardPosition');
+                
+                if (data.current_position) {
+                    const isTop20 = data.is_top_20;
+                    const statusClass = isTop20 ? 'top-20-indicator' : 'below-20-indicator';
+                    const statusText = isTop20 ? 'Top 20' : 'Below Top 20';
+                    
+                    positionElement.innerHTML = `
+                        <div class="position-number">#${data.current_position}</div>
+                        <div class="position-label">Your Position</div>
+                        <div class="mt-2">
+                            <span class="badge ${statusClass} fs-6">${statusText}</span>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">${data.status_message}</small>
+                        </div>
+                    `;
+                } else {
+                    positionElement.innerHTML = `
+                        <div class="position-number">N/A</div>
+                        <div class="position-label">Your Position</div>
+                        <div class="mt-2">
+                            <span class="badge below-20-indicator fs-6">Position Unavailable</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard position:', error);
+                document.getElementById('leaderboardPosition').innerHTML = `
+                    <div class="position-number">N/A</div>
+                    <div class="position-label">Your Position</div>
+                    <div class="mt-2">
+                        <span class="badge below-20-indicator fs-6">Error Loading</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Load mini leaderboard
+        async function loadMiniLeaderboard() {
+            try {
+                const response = await fetch('/api/donor/leaderboard-dashboard');
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login_donor';
+                    return;
+                }
+                const data = await response.json();
+                const container = document.getElementById('miniLeaderboard');
+                
+                if (data.leaderboard.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center p-3">No donors registered yet.</p>';
+                    return;
+                }
+                
+                let html = '';
+                data.leaderboard.slice(0, 10).forEach((donor, index) => {
+                    const position = index + 1;
+                    let medal = '';
+                    let medalClass = '';
+                    
+                    if (position === 1) {
+                        medal = '🥇';
+                        medalClass = 'text-warning';
+                    } else if (position === 2) {
+                        medal = '🥈';
+                        medalClass = 'text-secondary';
+                    } else if (position === 3) {
+                        medal = '🥉';
+                        medalClass = 'text-danger';
+                    } else {
+                        medal = `${position}.`;
+                        medalClass = 'text-muted';
+                    }
+                    
+                    const currentDonorClass = donor.is_current_donor ? 'bg-light border-start border-warning border-3' : '';
+                    const eligibilityBadge = donor.eligibility_status === 'eligible' 
+                        ? '<span class="badge bg-success badge-sm">Eligible</span>'
+                        : '<span class="badge bg-danger badge-sm">Not Eligible</span>';
+                    
+                    html += `
+                        <div class="d-flex justify-content-between align-items-center p-2 border-bottom ${currentDonorClass}">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 ${medalClass}" style="min-width: 30px;">${medal}</span>
+                                <div>
+                                    <div class="fw-bold ${donor.is_current_donor ? 'text-warning' : ''}">${donor.name}</div>
+                                    <small class="text-muted">${donor.blood_group} • ${donor.location}</small>
+                                    ${eligibilityBadge}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success">${donor.donations_count}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading mini leaderboard:', error);
+                document.getElementById('miniLeaderboard').innerHTML = 
+                    '<p class="text-danger text-center p-3">Error loading leaderboard.</p>';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDonorData();
+            loadAlerts();
+            loadLeaderboardPosition(); // Load leaderboard position on page load
+            loadMiniLeaderboard(); // Load mini leaderboard on page load
+        });
+    </script>
+</body>
+</html>
+
+

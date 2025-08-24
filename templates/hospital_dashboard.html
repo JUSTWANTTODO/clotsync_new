@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Dashboard - ClotSync</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .inventory-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .inventory-card:hover {
+            transform: translateY(-5px);
+        }
+        .blood-group-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .shortage-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .adequate-stock {
+            background-color: #d1edff;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-0">
+                <div class="p-4 text-white">
+                    <h4><i class="fas fa-hospital me-2"></i>ClotSync</h4>
+                    <hr class="text-white">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white active" href="#dashboard" data-bs-toggle="tab">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#inventory" data-bs-toggle="tab">
+                                <i class="fas fa-boxes me-2"></i>Inventory
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#predictions" data-bs-toggle="tab">
+                                <i class="fas fa-chart-line me-2"></i>Shortage Predictions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#transfers" data-bs-toggle="tab">
+                                <i class="fas fa-exchange-alt me-2"></i>Transfers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#requests" data-bs-toggle="tab">
+                                <i class="fas fa-clipboard-list me-2"></i>Blood Requests
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#donor-acceptances" data-bs-toggle="tab">
+                                <i class="fas fa-user-check me-2"></i>Donor Acceptances
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-white" href="/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2>Welcome, {{ hospital.name }}</h2>
+                            <p class="text-muted">{{ hospital.location }}</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary">Hospital ID: {{ hospital.id }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Dashboard Tab -->
+                        <div class="tab-pane fade show active" id="dashboard">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card inventory-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Current Inventory Summary</h5>
+                                            <div id="inventory-summary">
+                                                <!-- Will be populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card inventory-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Quick Actions</h5>
+                                            <div class="d-grid gap-2">
+                                                <button class="btn btn-primary" onclick="showUpdateInventoryModal()">
+                                                    <i class="fas fa-plus me-2"></i>Update Inventory
+                                                </button>
+                                                <button class="btn btn-success" onclick="showTransferModal()">
+                                                    <i class="fas fa-exchange-alt me-2"></i>Transfer Blood
+                                                </button>
+                                                <button class="btn btn-info" onclick="loadPredictions()">
+                                                    <i class="fas fa-chart-line me-2"></i>Check Predictions
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventory Tab -->
+                        <div class="tab-pane fade" id="inventory">
+                            <div class="card inventory-card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Blood Inventory Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row" id="inventory-grid">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Predictions Tab -->
+                        <div class="tab-pane fade" id="predictions">
+                            <div class="card inventory-card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Shortage Predictions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="predictions-content">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transfers Tab -->
+                        <div class="tab-pane fade" id="transfers">
+                            <div class="card inventory-card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Blood Transfers</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="transfers-content">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Requests Tab -->
+                        <div class="tab-pane fade" id="requests">
+                            <div class="card inventory-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Blood Requests</h5>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadRequests()">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="requests-content">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="mt-2">Loading requests...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Donor Acceptances Tab -->
+                        <div class="tab-pane fade" id="donor-acceptances">
+                            <div class="card inventory-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Pending Donor Acceptances</h5>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadDonorAcceptances()">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="donor-acceptances-content">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="mt-2">Loading donor acceptances...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Inventory Modal -->
+    <div class="modal fade" id="updateInventoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Blood Inventory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateInventoryForm">
+                        <div class="mb-3">
+                            <label class="form-label">Blood Group</label>
+                            <select class="form-select" id="bloodGroup" required>
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Units (use negative for reduction)</label>
+                            <input type="number" class="form-control" id="units" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateInventory()">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal fade" id="transferModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transfer Blood to Another Hospital</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transferForm">
+                        <div class="mb-3">
+                            <label class="form-label">To Hospital</label>
+                            <select class="form-select" id="toHospital" required>
+                                <option value="">Select Hospital</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Blood Group</label>
+                            <select class="form-select" id="transferBloodGroup" required>
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Units to Transfer</label>
+                            <input type="number" class="form-control" id="transferUnits" required min="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="transferBlood()">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Donation Modal -->
+    <div class="modal fade" id="confirmDonationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Donation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="donationDetails"></div>
+                    <form id="confirmDonationForm">
+                        <div class="mb-3">
+                            <label class="form-label">Units Actually Donated</label>
+                            <input type="number" class="form-control" id="unitsDonated" required min="1" max="10">
+                            <small class="form-text text-muted">Enter the actual number of units this donor donated</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmDonation()">Confirm Donation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInventory();
+            loadHospitals();
+            loadRequests();
+            loadDonorAcceptances();
+        });
+
+        // Load inventory data
+        function loadInventory() {
+            fetch(`/get_inventory/{{ hospital.id }}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayInventory(data.inventory);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Display inventory
+        function displayInventory(inventory) {
+            const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+            let summaryHtml = '';
+            let gridHtml = '';
+
+            bloodGroups.forEach(group => {
+                const units = inventory[group] || 0;
+                const statusClass = units < 10 ? 'shortage-warning' : 'adequate-stock';
+                
+                summaryHtml += `
+                    <div class="blood-group-card ${statusClass}">
+                        <h6>${group}</h6>
+                        <h4>${units} units</h4>
+                    </div>
+                `;
+
+                gridHtml += `
+                    <div class="col-md-3 mb-3">
+                        <div class="blood-group-card ${statusClass}">
+                            <h6>${group}</h6>
+                            <h4>${units} units</h4>
+                            <button class="btn btn-sm btn-outline-primary" onclick="updateSpecificGroup('${group}')">
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('inventory-summary').innerHTML = summaryHtml;
+            document.getElementById('inventory-grid').innerHTML = gridHtml;
+        }
+
+        // Load hospitals for transfer
+        function loadHospitals() {
+            // This would typically fetch from an API
+            const hospitals = [
+                { id: 1, name: 'City General Hospital' },
+                { id: 2, name: 'Metro Medical Center' }
+            ];
+
+            const select = document.getElementById('toHospital');
+            hospitals.forEach(hospital => {
+                if (hospital.id !== {{ hospital.id }}) {
+                    const option = document.createElement('option');
+                    option.value = hospital.id;
+                    option.textContent = hospital.name;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Show update inventory modal
+        function showUpdateInventoryModal() {
+            new bootstrap.Modal(document.getElementById('updateInventoryModal')).show();
+        }
+
+        // Show transfer modal
+        function showTransferModal() {
+            new bootstrap.Modal(document.getElementById('transferModal')).show();
+        }
+
+        // Update inventory
+        function updateInventory() {
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const units = parseInt(document.getElementById('units').value);
+
+            fetch('/update_inventory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    blood_group: bloodGroup,
+                    units: units
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Inventory updated successfully!');
+                    loadInventory();
+                    bootstrap.Modal.getInstance(document.getElementById('updateInventoryModal')).hide();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Transfer blood
+        function transferBlood() {
+            const toHospitalId = document.getElementById('toHospital').value;
+            const bloodGroup = document.getElementById('transferBloodGroup').value;
+            const units = parseInt(document.getElementById('transferUnits').value);
+
+            fetch('/transfer_blood', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    to_hospital_id: toHospitalId,
+                    blood_group: bloodGroup,
+                    units: units
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Blood transfer initiated successfully!');
+                    loadInventory();
+                    bootstrap.Modal.getInstance(document.getElementById('transferModal')).hide();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Load predictions
+        function loadPredictions() {
+            fetch('/predict_shortage')
+                .then(response => response.json())
+                .then(data => {
+                    let html = '<div class="row">';
+                    Object.entries(data).forEach(([group, status]) => {
+                        const statusClass = status.includes('shortage') ? 'shortage-warning' : 'adequate-stock';
+                        html += `
+                            <div class="col-md-3 mb-3">
+                                <div class="blood-group-card ${statusClass}">
+                                    <h6>${group}</h6>
+                                    <p class="mb-0">${status}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    document.getElementById('predictions-content').innerHTML = html;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Update specific blood group
+        function updateSpecificGroup(bloodGroup) {
+            document.getElementById('bloodGroup').value = bloodGroup;
+            showUpdateInventoryModal();
+        }
+
+        // Load blood requests
+        function loadRequests() {
+            fetch(`/get_requests/{{ hospital.id }}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayRequests(data.requests);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Display blood requests
+        function displayRequests(requests) {
+            const container = document.getElementById('requests-content');
+            
+            if (requests.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No pending blood requests</h5>
+                        <p class="text-muted">All requests have been fulfilled or there are no current requests.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="row">';
+            requests.forEach(request => {
+                const urgencyClass = request.urgency === 'emergency' ? 'border-danger' : 
+                                   request.urgency === 'urgent' ? 'border-warning' : 'border-info';
+                const urgencyBadge = request.urgency === 'emergency' ? 'danger' : 
+                                   request.urgency === 'urgent' ? 'warning' : 'info';
+                
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card ${urgencyClass} h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-user me-2"></i>${request.patient_name}
+                                </h6>
+                                <span class="badge bg-${urgencyBadge}">${request.urgency}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Blood Group:</strong></p>
+                                        <span class="badge bg-danger">${request.blood_group}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Units Needed:</strong></p>
+                                        <span class="badge bg-secondary">${request.units_needed}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="mb-1"><strong>Patient Location:</strong> ${request.patient_location_formatted || request.patient_location}</p>
+                                    <p class="mb-1"><strong>Distance:</strong> ${request.distance_text}</p>
+                                    <p class="mb-1"><strong>Requested:</strong> ${new Date(request.created_at).toLocaleString()}</p>
+                                </div>
+                                <div class="mt-3">
+                                    ${request.can_fulfill ? 
+                                        `<button class="btn btn-success btn-sm" onclick="fulfillRequest(${request.id}, ${request.units_needed})">
+                                            <i class="fas fa-check me-1"></i>Fulfill Request
+                                        </button>` :
+                                        `<button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-times me-1"></i>Insufficient Stock
+                                        </button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Fulfill blood request
+        function fulfillRequest(requestId, units) {
+            if (confirm('Are you sure you want to fulfill this blood request?')) {
+                fetch(`/fulfill_request/${requestId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        units: units
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert('Request fulfilled successfully!');
+                        loadInventory();
+                        loadRequests();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error fulfilling request. Please try again.');
+                });
+            }
+        }
+
+        // Load donor acceptances
+        function loadDonorAcceptances() {
+            fetch('/api/hospital/pending-acceptances')
+                .then(response => response.json())
+                .then(data => {
+                    displayDonorAcceptances(data.acceptances);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('donor-acceptances-content').innerHTML = 
+                        '<div class="text-center text-danger">Error loading donor acceptances</div>';
+                });
+        }
+
+        // Display donor acceptances
+        function displayDonorAcceptances(acceptances) {
+            const container = document.getElementById('donor-acceptances-content');
+            
+            if (!acceptances || acceptances.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-check fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No pending donor acceptances</h5>
+                        <p class="text-muted">All donors have completed their donations or there are no current acceptances.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="row">';
+            acceptances.forEach(acceptance => {
+                const urgencyClass = acceptance.urgency === 'emergency' ? 'border-danger' : 
+                                   acceptance.urgency === 'urgent' ? 'border-warning' : 'border-info';
+                const urgencyBadge = acceptance.urgency === 'emergency' ? 'danger' : 
+                                   acceptance.urgency === 'urgent' ? 'warning' : 'info';
+                
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card ${urgencyClass} h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-user-check me-2"></i>Donor: ${acceptance.donor_name}
+                                </h6>
+                                <span class="badge bg-${urgencyBadge}">${acceptance.urgency}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Request Code:</strong></p>
+                                        <span class="badge bg-primary">${acceptance.request_code || 'N/A'}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Blood Group:</strong></p>
+                                        <span class="badge bg-danger">${acceptance.blood_group}</span>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Units Needed:</strong></p>
+                                        <span class="badge bg-secondary">${acceptance.units_needed}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Required By:</strong></p>
+                                        <span class="text-muted">${acceptance.required_by || 'ASAP'}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="mb-1"><strong>Patient:</strong> ${acceptance.patient_name} (${acceptance.patient_gender || 'N/A'}, ${acceptance.patient_age || 'N/A'})</p>
+                                    <p class="mb-1"><strong>Problem:</strong> ${acceptance.patient_problem || 'N/A'}</p>
+                                    <p class="mb-1"><strong>Donor Contact:</strong> ${acceptance.donor_contact}</p>
+                                    <p class="mb-1"><strong>Donor Location:</strong> ${acceptance.donor_location}</p>
+                                    <p class="mb-1"><strong>Accepted:</strong> ${new Date(acceptance.accepted_at).toLocaleString()}</p>
+                                    ${acceptance.note ? `<p class="mb-1"><strong>Donor Note:</strong> <em>${acceptance.note}</em></p>` : ''}
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-success btn-sm" onclick="showConfirmDonationModal(${acceptance.id}, '${acceptance.donor_name}', '${acceptance.blood_group}', ${acceptance.units_needed}, '${acceptance.request_code}')">
+                                        <i class="fas fa-check me-1"></i>Confirm Donation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Show confirm donation modal
+        function showConfirmDonationModal(acceptanceId, donorName, bloodGroup, unitsNeeded, requestCode) {
+            currentAcceptanceId = acceptanceId;
+            document.getElementById('donationDetails').innerHTML = `
+                <div class="alert alert-info">
+                    <h6>Donation Details</h6>
+                    <p><strong>Donor:</strong> ${donorName}</p>
+                    <p><strong>Blood Group:</strong> ${bloodGroup}</p>
+                    <p><strong>Units Requested:</strong> ${unitsNeeded}</p>
+                    <p><strong>Request Code:</strong> ${requestCode}</p>
+                </div>
+            `;
+            document.getElementById('unitsDonated').value = unitsNeeded;
+            document.getElementById('unitsDonated').max = unitsNeeded;
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmDonationModal'));
+            modal.show();
+        }
+
+        // Confirm donation
+        function confirmDonation() {
+            const unitsDonated = parseInt(document.getElementById('unitsDonated').value);
+            
+            if (!unitsDonated || unitsDonated < 1) {
+                alert('Please enter a valid number of units donated');
+                return;
+            }
+
+            fetch('/api/hospital/confirm-donation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    acceptance_id: currentAcceptanceId,
+                    units_donated: unitsDonated
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Donation confirmed successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('confirmDonationModal')).hide();
+                    loadDonorAcceptances();
+                    loadInventory();
+                    loadRequests();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error confirming donation. Please try again.');
+            });
+        }
+
+        // Global variable for current acceptance ID
+        let currentAcceptanceId = null;
+    </script>
+</body>
+</html>

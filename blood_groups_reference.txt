@@ -1,0 +1,70 @@
+COMPREHENSIVE BLOOD GROUPS FOR CLOTSYNC
+========================================
+
+This file contains all the blood groups that are now supported in the ClotSync system.
+
+STANDARD BLOOD GROUPS:
+- A Negative
+- A Positive  
+- B Negative
+- B Positive
+- AB Positive
+- O Negative
+- O Positive
+
+EXTENDED BLOOD GROUPS:
+- A1 Positive
+- A1B Positive
+- A2 Negative
+- A2B Negative
+- A2B Positive
+- Bombay Blood Group
+
+TOTAL: 14 blood group options
+
+NOTES:
+- All blood groups are stored as VARCHAR(25) in the database (updated from VARCHAR(15))
+- The system now supports both standard and rare blood groups including "Bombay Blood Group" (18 characters)
+- All registration forms (donor, patient) have been updated with gender dropdowns
+- Location detection with coordinates is now implemented
+- Dynamic next_eligible date calculation: 3 months for males, 4 months for females
+- Hospital inventory initialization includes all blood groups
+- Blood group predictions have been updated accordingly
+
+USAGE:
+- Donor registration forms (with gender, location detection, coordinates)
+- Patient registration forms  
+- Hospital inventory management
+- Blood request forms
+- Search and filtering
+- Analytics and reporting
+
+NEW FEATURES:
+- Gender dropdown (Male/Female/Other)
+- Automatic location detection using browser geolocation
+- Reverse geocoding to get human-readable location names
+- Automatic next_eligible date calculation based on gender
+- Coordinates (latitude/longitude) storage for mapping purposes
+- Eligibility status calculation (eligible/not eligible) based on donation intervals
+- Automatic eligibility updates when donation dates change
+- Enhanced leaderboard system with top 20 rankings and current donor position highlighting
+
+LEADERBOARD SYSTEM:
+- Top 20 Donors: Shows top 20 donors by donation count
+- Current Donor Position: Highlights logged-in donor's position
+- Position Calculation: Real-time ranking based on donation count
+- Status Messages: 
+  * Top 20: "🎉 Congratulations! You're in the TOP 20 at position #X"
+  * Below 20: "📊 You're currently at position #X out of Y donors"
+- Dashboard Integration: Mini leaderboard on donor dashboard
+- Eligibility Display: Shows eligible/not eligible status for each donor
+- Visual Highlights: Current donor highlighted with special styling
+
+ELIGIBILITY SYSTEM:
+- Eligibility Status: Two values - 'eligible' or 'not eligible'
+- Calculation Logic:
+  * Males: 4 months (120 days) gap required between donations
+  * Females: 3 months (90 days) gap required between donations
+  * Other: 4 months (120 days) gap required (default)
+- Automatic Updates: Eligibility recalculates when last donation date changes
+- API Endpoints: Check eligibility and update donation dates

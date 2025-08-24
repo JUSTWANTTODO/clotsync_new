@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClotSync - Blood Donation & Hospital Inventory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-card {
+            transition: transform 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .portal-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .portal-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        .stats-section {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat text-danger me-2"></i>
+                ClotSync
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#portals">Portals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/leaderboard">Leaderboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_reports">📊 Reports</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">
+                <i class="fas fa-heartbeat text-danger me-3"></i>
+                ClotSync
+            </h1>
+            <p class="lead mb-4">Revolutionary Blood Donation & Hospital Inventory Management System</p>
+            <p class="mb-5">Connecting donors, hospitals, and patients for efficient blood management</p>
+            <a href="#portals" class="btn btn-light btn-lg px-4">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Key Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hospital fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Hospital Dashboard</h5>
+                            <p class="card-text">Manage blood inventory, view shortage forecasts, and coordinate transfers between hospitals.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Donor Portal</h5>
+                            <p class="card-text">Register as a donor, receive alerts for blood requests, and track your donation history.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-injured fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Patient Portal</h5>
+                            <p class="card-text">Request blood urgently and get matched with the nearest available donors or hospitals.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-robot fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">AI Chatbot Assistant</h5>
+                            <p class="card-text">Get instant answers about thalassemia, blood donation, and eligibility through our intelligent chatbot.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">AI-Powered Reports</h5>
+                            <p class="card-text">Advanced analytics and insights with predictive outlook, donor personas, and risk detection.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portals Section -->
+    <section id="portals" class="stats-section">
+        <div class="container">
+            <h2 class="text-center mb-5">Access Your Portal</h2>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="portal-card">
+                        <i class="fas fa-hospital fa-4x text-primary mb-4"></i>
+                        <h4>Hospital Portal</h4>
+                        <p class="text-muted mb-4">Manage your blood inventory and coordinate with other hospitals</p>
+                        <div class="d-grid gap-2">
+                            <a href="/login_hospital" class="btn btn-primary">Login</a>
+                            <a href="/register_hospital" class="btn btn-outline-primary">Register</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="portal-card">
+                        <i class="fas fa-user-plus fa-4x text-success mb-4"></i>
+                        <h4>Donor Portal</h4>
+                        <p class="text-muted mb-4">Register as a donor and help save lives</p>
+                        <div class="d-grid gap-2">
+                            <a href="/donor_portal" class="btn btn-success">Register</a>
+                            <a href="/login_donor" class="btn btn-outline-success">Login</a>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="portal-card">
+                        <i class="fas fa-user-injured fa-4x text-warning mb-4"></i>
+                        <h4>Patient Portal</h4>
+                        <p class="text-muted mb-4">Request blood when you need it most</p>
+                        <div class="d-grid gap-2">
+                            
+                            <a href="/register_patient" class="btn btn-outline-warning">Register</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2024 ClotSync. All rights reserved.</p>
+            <p class="mb-0">Connecting lives through blood donation</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chatbot Widget -->
+    {% include 'clotsync_chatbot_widget.html' %}
+</body>
+</html>
+

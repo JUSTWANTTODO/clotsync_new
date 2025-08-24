@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ClotSync AI Admin Report</title>
+	<style>
+		body {
+			font-family: 'Segoe UI', Arial, sans-serif;
+			background: #f7f9fa;
+			margin: 0;
+			padding: 0;
+			color: #222;
+		}
+		.container {
+			max-width: 800px;
+			margin: 40px auto;
+			background: #fff;
+			border-radius: 12px;
+			box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+			padding: 32px 28px 24px 28px;
+		}
+		h1 {
+			text-align: center;
+			color: #b30000;
+			margin-bottom: 8px;
+		}
+		h2 {
+			color: #b30000;
+			margin-top: 32px;
+			margin-bottom: 8px;
+			font-size: 1.3em;
+		}
+		.section {
+			margin-bottom: 28px;
+		}
+		.section p, .section pre {
+			margin: 0 0 8px 0;
+			font-size: 1.08em;
+		}
+		.section pre {
+			background: #f3f3f3;
+			border-radius: 6px;
+			padding: 12px;
+			font-family: 'Fira Mono', 'Consolas', monospace;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			word-wrap: break-word;
+		}
+		.badge {
+			display: inline-block;
+			background: #b30000;
+			color: #fff;
+			border-radius: 6px;
+			padding: 2px 10px;
+			font-size: 0.95em;
+			margin-right: 8px;
+		}
+		.back-btn {
+			display: inline-block;
+			background: #667eea;
+			color: #fff;
+			padding: 10px 20px;
+			text-decoration: none;
+			border-radius: 6px;
+			margin-bottom: 20px;
+			transition: background 0.3s ease;
+		}
+		.back-btn:hover {
+			background: #5a6fd8;
+			color: #fff;
+			text-decoration: none;
+		}
+		@media (max-width: 600px) {
+			.container { padding: 12px 4vw; }
+			h1 { font-size: 1.5em; }
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<a href="/" class="back-btn">← Back to Home</a>
+		<h1>ClotSync AI Admin Report</h1>
+		<div class="section">
+			<h2><span class="badge">1</span>Narrative Storytelling</h2>
+			<p id="narrative">{{ report.narrative if report else 'No data available.' }}</p>
+		</div>
+		<div class="section">
+			<h2><span class="badge">2</span>Predictive Outlook</h2>
+			<pre id="predictive_outlook">{{ report.predictive_outlook if report else 'No data available.' }}</pre>
+		</div>
+		<div class="section">
+			<h2><span class="badge">3</span>Donor Personas</h2>
+			<pre id="personas">{{ report.personas if report else 'No data available.' }}</pre>
+		</div>
+		<div class="section">
+			<h2><span class="badge">4</span>Impact Simulation</h2>
+			<p id="impact_simulation">{{ report.impact_simulation if report else 'No data available.' }}</p>
+		</div>
+		<div class="section">
+			<h2><span class="badge">5</span>Anomaly & Risk Detection</h2>
+			<p id="anomaly_risk">{{ report.anomaly_risk if report else 'No data available.' }}</p>
+		</div>
+	</div>
+</body>
+</html>
