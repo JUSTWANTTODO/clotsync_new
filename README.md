@@ -24,8 +24,8 @@ A comprehensive full-stack web application for managing blood donations, hospita
 - **Request History**: Track all blood requests and their status
 
 ### AI Integration
-- **Shortage Prediction**: ML-powered forecasting for blood shortages
-- **Smart Matching**: Intelligent donor-patient matching algorithm
+- AI Reports
+- FAQ Bot
 
 ## 🛠️ Technology Stack
 
@@ -200,5 +200,6 @@ For support and questions:
 ---
 
 **ClotSync** - Connecting lives through blood donation 🩸
+
 
 
